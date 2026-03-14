@@ -21,14 +21,31 @@ jobs:
         username: ec2-user
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
+          echo "Checking and installing git..."
+          sudo dnf install -y git
+          
           cd /home/ec2-user
+          
           if [ ! -d "SimpleApplication" ]; then
+            echo "Cloning repository for the first time..."
             git clone https://github.com/${{ github.repository }}.git
+          else
+            echo "Repository exists, pulling latest changes..."
+            cd SimpleApplication
+            git pull origin main
           fi
-          cd SimpleApplication
-          git pull origin main
+          
+          cd /home/ec2-user/SimpleApplication
+          
+          echo "Installing npm dependencies..."
           npm install --production
+          
+          echo "Setting up PM2..."
           command -v pm2 >/dev/null 2>&1 || sudo npm install -g pm2
+          
+          echo "Starting application with PM2..."
           pm2 delete simple-app 2>/dev/null || true
-          pm2 start /home/ec2-user/SimpleApplication/app.js --name "simple-app"  # 修改了这一行
+          pm2 start /home/ec2-user/SimpleApplication/app.js --name "simple-app"
           pm2 save
+          
+          echo "Deployment completed successfully!"
