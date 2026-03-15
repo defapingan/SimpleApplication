@@ -8,12 +8,14 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+    #CI
     - name: Checkout code
       uses: actions/checkout@v3
       
     - name: Install dependencies
       run: npm install
       
+      #CD
     - name: Deploy to EC2
       uses: appleboy/ssh-action@v0.1.5
       with:
